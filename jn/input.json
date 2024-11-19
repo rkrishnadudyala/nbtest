@@ -1,0 +1,4 @@
+{
+  "type": "dump",
+  "cluster_key": "${cluster_key}"
+}

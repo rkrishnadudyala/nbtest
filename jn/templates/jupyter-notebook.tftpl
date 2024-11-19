@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-notebook
+  labels:
+    app: jupyter-notebook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyter-notebook
+  template:
+    metadata:
+      labels:
+        app: jupyter-notebook
+    spec:
+      containers:
+      - name: minimal-notebook
+        #image: jupyter/minimal-notebook:latest
+        #image: jupyter/datascience-notebook:latest
+        #image: jupyter/all-spark-notebook
+        #image: jupyter/tensorflow-notebook:latest
+        image: ${image}
+        ports:
+        - containerPort: 8888
+        command: ["start-notebook.sh"]
+        args: ["--NotebookApp.token='${token}'"]
+        resources:
+          limits:
+            cpu: ${cpu_limit}
+            memory: ${memory_limit}
+            nvidia.com/gpu: ${gpu_limit}
+          requests:
+            cpu: ${cpu_request}
+            memory: ${memory_request}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jupyter-notebook
+spec:
+  type: ClusterIP
+  selector:
+    app: jupyter-notebook
+  ports:
+  - protocol: TCP
+    port: 8888
+    targetPort: 8888
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jupyter-notebook
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-demo
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: ${ingress_host}
+    http:
+      paths:
+      - backend:
+          service:
+            name: jupyter-notebook
+            port:
+              number: 8888
+        path: /
+        pathType: Prefix
+  tls:
+  - secretName: jupyter-notebook-tls
+    hosts:
+      - ${ingress_host}
