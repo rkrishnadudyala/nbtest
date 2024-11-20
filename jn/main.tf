@@ -107,6 +107,7 @@ resource "rafay_access_apikey" "sampleuser" {
   user_name = var.username
 }
 
+/*
 resource "null_resource" "get_ingress_ip" {
   count = var.deploy_notebook == "yes" ? 1 : 0
   triggers = {
@@ -140,4 +141,4 @@ resource "aws_route53_record" "jupyter" {
   type    = "A"
   ttl     = 300
   records = [data.local_file.ingress_ip[0].content]
-}
+}*/
