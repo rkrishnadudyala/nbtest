@@ -40,6 +40,8 @@ locals {
   token = one(random_string.token[*].result)
 }
 
+/*
+
 data "aws_lambda_invocation" "cluster" {
   count = var.deploy_notebook == "yes" ? 1 : 0
   function_name = "km-redis"
@@ -52,7 +54,7 @@ data "aws_lambda_invocation" "namespace" {
   input = templatefile("input.json", {cluster_key= local.namespace_key})
 }
 
-/*resource "rafay_namespace" "namespace" {
+resource "rafay_namespace" "namespace" {
   count = length(jsondecode(data.aws_lambda_invocation.namespace.result)["remaining"]) > 0 ? 0 : 1
   metadata {
     name    = var.name
