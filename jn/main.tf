@@ -49,13 +49,22 @@ resource "local_file" "kubeconfig" {
 }
 
 provider "kubernetes" {
-  #config_path = local_file.kubeconfig.filename
   config_path = "/tmp/test/host-kubeconfig.yaml"
 }
 
-# Create the namespace (optional)
 resource "kubernetes_namespace" "namespace" {
   metadata {
     name = var.name
   }
+
+  depends_on = [local_file.kubeconfig]
+}
+
+resource "null_resource" "apply_manifest" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/jupyter_notebook.yaml --kubeconfig=/tmp/test/host-kubeconfig.yaml -n ${var.name}"
+  }
+
+
+  depends_on = [local_file.kubeconfig, kubernetes_namespace.namespace]
 }
