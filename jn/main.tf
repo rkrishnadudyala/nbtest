@@ -15,40 +15,7 @@ resource "random_string" "token" {
   upper   = false
 }
 
-resource "local_file" "jupyter_notebook" {
-  count = var.deploy_notebook == "yes" ? 1 : 0
-  content = templatefile("${path.module}/templates/jupyter-notebook.tftpl", {
-    image = [for v in var.notebook_profiles: v.image if v.name == var.notebook_profile][0]
-    token = random_string.token[0].result
-    ingress_host = "${var.name}.${var.ingress_domain}"
-    cpu_request = var.cpu_request
-    memory_request = var.memory_request
-    cpu_limit = var.cpu_limit
-    memory_limit = var.memory_limit
-    gpu_limit = var.gpu_limit
-  })
-  filename = "jupyter_notebook.yaml"
-}
 
-locals {
-  cluster_key = "cluster.${var.username}"
-  namespace_key = "namespace.${var.username}"
-  token = one(random_string.token[*].result)
-}
-
-
-data "rafay_download_kubeconfig" "kubeconfig_cluster" {
-  cluster = var.cluster_name
-}
-
-resource "local_file" "kubeconfig" {
-  lifecycle {
-    ignore_changes = all
-  }
-  depends_on = [data.rafay_download_kubeconfig.kubeconfig_cluster]
-  content    = data.rafay_download_kubeconfig.kubeconfig_cluster.kubeconfig
-  filename   = "/tmp/test/host-kubeconfig.yaml"
-}
 
 /*
 provider "aws" {
