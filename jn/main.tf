@@ -36,6 +36,40 @@ locals {
   token = one(random_string.token[*].result)
 }
 
+
+data "rafay_download_kubeconfig" "kubeconfig_cluster" {
+  cluster = var.cluster_name
+}
+
+resource "local_file" "kubeconfig" {
+  lifecycle {
+    ignore_changes = all
+  }
+  depends_on = [data.rafay_download_kubeconfig.kubeconfig_cluster]
+  content    = data.rafay_download_kubeconfig.kubeconfig_cluster.kubeconfig
+  filename   = "/tmp/test/host-kubeconfig.yaml"
+}
+
+provider "kubernetes" {
+  config_path = "/tmp/test/host-kubeconfig.yaml"
+}
+
+# Create the namespace (optional)
+resource "kubernetes_namespace" "namespace" {
+  metadata {
+    name = namespace_key
+  }
+}
+
+# Use the Kubernetes manifest resource to deploy using a YAML file
+resource "kubernetes_manifest" "jupyter_deployment" {
+  yaml_body = file("${path.module}/jupyter_notebook.yaml")
+
+  depends_on = [
+    kubernetes_namespace.namespace,
+  ]
+}
+
 /*
 provider "aws" {
   region  = "us-west-2"
