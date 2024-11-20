@@ -98,7 +98,7 @@ resource "rafay_workload" "jupyter-notebook" {
     }
   }
   #depends_on = [rafay_namespace.namespace,local_file.jupyter_notebook,aws_route53_record.jupyter]
-  depends_on = [local_file.jupyter_notebook,aws_route53_record.jupyter]
+  #depends_on = [local_file.jupyter_notebook,aws_route53_record.jupyter]
 }
 
 resource "rafay_access_apikey" "sampleuser" {
