@@ -30,10 +30,6 @@ resource "local_file" "jupyter_notebook" {
   filename = "jupyter_notebook.yaml"
 }
 
-provider "aws" {
-  region  = "us-west-2"
-}
-
 locals {
   cluster_key = "cluster.${var.username}"
   namespace_key = "namespace.${var.username}"
@@ -41,6 +37,9 @@ locals {
 }
 
 /*
+provider "aws" {
+  region  = "us-west-2"
+}
 
 data "aws_lambda_invocation" "cluster" {
   count = var.deploy_notebook == "yes" ? 1 : 0
